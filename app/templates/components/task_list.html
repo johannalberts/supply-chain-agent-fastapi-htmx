@@ -1,0 +1,71 @@
+{% for task in tasks %}
+<div class="task-item mb-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors cursor-pointer"
+     hx-get="/api/report/{{ task.report_id }}"
+     hx-target="#report-detail"
+     hx-swap="innerHTML"
+     onclick="selectTask('{{ task.task_id }}')">
+    <div class="flex items-start justify-between mb-2">
+        <h3 class="font-semibold text-gray-900 dark:text-white">{{ task.industry }}</h3>
+        <span class="status-badge status-{{ task.status.lower() }}">
+            {{ task.status }}
+        </span>
+    </div>
+    <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+        {{ task.created_at }}
+    </p>
+    {% if task.status == 'PROCESSING' %}
+    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden relative progress-bar">
+        <div class="bg-blue-600 h-full transition-all duration-300" style="width: {{ task.progress }}%"></div>
+    </div>
+    <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">{{ task.progress }}% complete</p>
+    {% endif %}
+    {% if task.status == 'FAILED' %}
+    <p class="text-xs text-red-600 dark:text-red-400 mt-1">{{ task.error_message }}</p>
+    {% endif %}
+</div>
+{% else %}
+<div class="text-center py-8 text-gray-500 dark:text-gray-400">
+    <p>No tasks found</p>
+</div>
+{% endfor %}
+
+<style>
+    .status-badge {
+        padding: 2px 8px;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+    .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    .dark .status-pending {
+        background-color: rgba(251, 191, 36, 0.2);
+        color: #fbbf24;
+    }
+    .status-processing {
+        background-color: #dbeafe;
+        color: #1e40af;
+    }
+    .dark .status-processing {
+        background-color: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+    }
+    .status-completed {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .dark .status-completed {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    .status-failed {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    .dark .status-failed {
+        background-color: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+</style>

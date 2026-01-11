@@ -1,0 +1,102 @@
+<div class="p-8 max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">{{ report.industry }}</h1>
+        <p class="text-sm text-gray-600 dark:text-gray-400">Generated {{ report.created_at }}</p>
+    </div>
+
+    <!-- Fragility Score Gauge -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Supply Chain Fragility Score</h2>
+        <div class="flex items-center gap-6">
+            <div class="relative w-32 h-32">
+                <svg class="transform -rotate-90 w-32 h-32">
+                    <circle cx="64" cy="64" r="52" stroke="currentColor" stroke-width="12" fill="none" class="text-gray-200 dark:text-gray-700" />
+                    <circle cx="64" cy="64" r="52" stroke="currentColor" stroke-width="12" fill="none" 
+                        class="{% if report.fragility_score <= 3 %}text-green-500{% elif report.fragility_score <= 6 %}text-yellow-500{% else %}text-red-500{% endif %}"
+                        stroke-dasharray="{{ (report.fragility_score / 10) * 326.73 }} 326.73"
+                        stroke-linecap="round" />
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-3xl font-bold {% if report.fragility_score <= 3 %}text-green-600 dark:text-green-400{% elif report.fragility_score <= 6 %}text-yellow-600 dark:text-yellow-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+                        {{ report.fragility_score }}
+                    </span>
+                </div>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    {% if report.fragility_score <= 3 %}
+                    <span class="text-green-600 dark:text-green-400 font-semibold">Low Risk</span> - Supply chain is stable
+                    {% elif report.fragility_score <= 6 %}
+                    <span class="text-yellow-600 dark:text-yellow-400 font-semibold">Moderate Risk</span> - Some vulnerabilities present
+                    {% else %}
+                    <span class="text-red-600 dark:text-red-400 font-semibold">High Risk</span> - Significant disruptions likely
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Executive Summary -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Executive Summary</h2>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{{ report.executive_summary }}</p>
+    </div>
+
+    <!-- Critical Alerts -->
+    {% if report.critical_alerts %}
+    <div class="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 mb-6 border border-red-200 dark:border-red-800">
+        <h2 class="text-lg font-semibold mb-4 text-red-900 dark:text-red-300 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            Critical Alerts
+        </h2>
+        <ul class="space-y-2">
+            {% for alert in report.critical_alerts %}
+            <li class="flex items-start gap-2 text-red-800 dark:text-red-300">
+                <span class="text-red-600 dark:text-red-400 mt-1">•</span>
+                <span>{{ alert }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Risk Metrics -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Risk Breakdown</h2>
+        <div class="space-y-4">
+            {% for metric in report.risk_metrics %}
+            <div class="border-l-4 pl-4 {% if metric.impact_score <= 3 %}border-green-500{% elif metric.impact_score <= 6 %}border-yellow-500{% else %}border-red-500{% endif %}">
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="font-semibold text-gray-900 dark:text-white">{{ metric.category }}</h3>
+                    <span class="text-sm font-medium px-2 py-1 rounded {% if metric.impact_score <= 3 %}bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300{% elif metric.impact_score <= 6 %}bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300{% else %}bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300{% endif %}">
+                        Impact: {{ metric.impact_score }}/10
+                    </span>
+                </div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ metric.description }}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Sources -->
+    {% if report.sources %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700">
+        <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Sources</h2>
+        <ul class="space-y-2">
+            {% for source in report.sources %}
+            <li>
+                <a href="{{ source.url }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                    {{ source.title }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
